@@ -10,14 +10,14 @@ import (
 )
 
 type QueueManager struct {
-	nc      *NatsClient
+	nc      *nats.EncodedConn
 	log     *log.Helper
 	appName string
 	ql      sync.RWMutex
 	queues  map[string]*Queue
 }
 
-func NewQueueManager(c *config.Config, nc *NatsClient, logger log.Logger) *QueueManager {
+func NewQueueManager(c *config.Config, nc *nats.EncodedConn, logger log.Logger) *QueueManager {
 	return &QueueManager{
 		nc:      nc,
 		log:     log.NewHelper(logger),
@@ -84,12 +84,12 @@ func (qm *QueueManager) initQueue(subj string) *Queue {
 }
 
 type Queue struct {
-	nc   *NatsClient
+	nc   *nats.EncodedConn
 	log  *log.Helper
 	name string
 }
 
-func newQueue(nc *NatsClient, log *log.Helper, name string) *Queue {
+func newQueue(nc *nats.EncodedConn, log *log.Helper, name string) *Queue {
 	return &Queue{
 		nc:   nc,
 		log:  log,
