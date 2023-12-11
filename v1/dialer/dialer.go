@@ -19,7 +19,6 @@ type Dialer struct {
 	jwt       *jwtp.JwtProcessor
 }
 
-// NewJwtProcessor .
 func NewDialer(c *config.Config, jwt *jwtp.JwtProcessor) (*Dialer, error) {
 	return &Dialer{
 		discovery: c.GetRegistry(),
@@ -27,11 +26,13 @@ func NewDialer(c *config.Config, jwt *jwtp.JwtProcessor) (*Dialer, error) {
 	}, nil
 }
 
-func (d *Dialer) getJwtMiddleware(ctx context.Context) middleware.Middleware {
+func (d *Dialer) getJwtMiddleware(ctx context.Context, claims *jwtp.TenantClaims) middleware.Middleware {
 	return kjwt.Client(func(token *jwtv4.Token) (interface{}, error) {
 		return d.jwt.GetSecret(), nil
 	}, kjwt.WithSigningMethod(jwtv4.SigningMethodHS256), kjwt.WithClaims(func() jwtv4.Claims {
-		claims, _ := d.jwt.GetClaimsFromContext(ctx)
+		if claims == nil {
+			claims, _ = d.jwt.GetClaimsFromContext(ctx)
+		}
 		return claims
 	}))
 }
@@ -65,13 +66,13 @@ func (d *DialerBuilder[T]) SetTimeout(timeout time.Duration) *DialerBuilder[T] {
 	return d
 }
 
-func (d *DialerBuilder[T]) Conn(ctx context.Context) (T, error) {
+func (d *DialerBuilder[T]) Conn(ctx context.Context, claims *jwtp.TenantClaims) (T, error) {
 	conn, err := grpc.DialInsecure(
 		ctx,
 		grpc.WithEndpoint(d.endpoint),
 		grpc.WithDiscovery(d.dialer.discovery),
 		grpc.WithTimeout(d.timeout),
-		grpc.WithMiddleware(d.dialer.getJwtMiddleware(ctx)),
+		grpc.WithMiddleware(d.dialer.getJwtMiddleware(ctx, claims)),
 	)
 
 	var nilVar T
