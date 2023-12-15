@@ -5,12 +5,10 @@ import (
 	"time"
 
 	consul "github.com/go-kratos/consul/registry"
-	"github.com/go-kratos/kratos/v2/middleware"
-	kjwt "github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	jwtv4 "github.com/golang-jwt/jwt/v4"
 	"gitlab.calendaria.team/services/utils/v1/config"
 	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
+	"gitlab.calendaria.team/services/utils/v1/middlewares/auth"
 	ggrpc "google.golang.org/grpc"
 )
 
@@ -24,17 +22,6 @@ func NewDialer(c *config.Config, jwt *jwtp.JwtProcessor) (*Dialer, error) {
 		discovery: c.GetRegistry(),
 		jwt:       jwt,
 	}, nil
-}
-
-func (d *Dialer) getJwtMiddleware(ctx context.Context, claims *jwtp.TenantClaims) middleware.Middleware {
-	return kjwt.Client(func(token *jwtv4.Token) (interface{}, error) {
-		return d.jwt.GetSecret(), nil
-	}, kjwt.WithSigningMethod(jwtv4.SigningMethodHS256), kjwt.WithClaims(func() jwtv4.Claims {
-		if claims == nil {
-			claims, _ = d.jwt.GetClaimsFromContext(ctx)
-		}
-		return claims
-	}))
 }
 
 type DialerBuilder[T any] struct {
@@ -66,13 +53,13 @@ func (d *DialerBuilder[T]) SetTimeout(timeout time.Duration) *DialerBuilder[T] {
 	return d
 }
 
-func (d *DialerBuilder[T]) Conn(ctx context.Context, claims *jwtp.TenantClaims) (T, error) {
+func (d *DialerBuilder[T]) Conn(ctx context.Context, defaultClaims *jwtp.TenantClaims) (T, error) {
 	conn, err := grpc.DialInsecure(
 		ctx,
 		grpc.WithEndpoint(d.endpoint),
 		grpc.WithDiscovery(d.dialer.discovery),
 		grpc.WithTimeout(d.timeout),
-		grpc.WithMiddleware(d.dialer.getJwtMiddleware(ctx, claims)),
+		grpc.WithMiddleware(auth.Client(ctx, d.dialer.jwt, defaultClaims)),
 	)
 
 	var nilVar T
