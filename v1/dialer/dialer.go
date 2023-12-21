@@ -13,6 +13,7 @@ import (
 )
 
 type Dialer struct {
+	conn      *ggrpc.ClientConn
 	discovery *consul.Registry
 	jwt       *jwtp.JwtProcessor
 }
@@ -22,6 +23,14 @@ func NewDialer(c *config.Config, jwt *jwtp.JwtProcessor) (*Dialer, error) {
 		discovery: c.GetRegistry(),
 		jwt:       jwt,
 	}, nil
+}
+
+func (d *Dialer) Close() error {
+	if d.conn == nil {
+		return nil
+	}
+
+	return d.conn.Close()
 }
 
 type DialerBuilder[T any] struct {
@@ -66,6 +75,8 @@ func (d *DialerBuilder[T]) Conn(ctx context.Context, defaultClaims *jwtp.TenantC
 	if err != nil {
 		return nilVar, err
 	}
+
+	d.dialer.conn = conn
 
 	return d.clientConn(conn), nil
 }
