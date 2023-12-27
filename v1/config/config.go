@@ -97,12 +97,18 @@ func (c *Config) GetVault(ctx context.Context) (*vault.Client, error) {
 		if roleID == "" {
 			return nil, fmt.Errorf("No role ID was provided in VAULT_ROLE_ID env var")
 		}
+
+		var secretID *auth.SecretID
 		secretIDpath := os.Getenv("VAULT_SECRET_ID_PATH")
 		if secretIDpath == "" {
-			return nil, fmt.Errorf("No secret ID file path was provided in VAULT_SECRET_ID_PATH env var")
+			secretIDstring := os.Getenv("VAULT_SECRET_ID")
+			if secretIDstring == "" {
+				return nil, fmt.Errorf("No secret ID file path was provided in VAULT_SECRET_ID/VAULT_SECRET_ID_PATH env vars")
+			}
+			secretID = &auth.SecretID{FromString: secretIDstring}
+		} else {
+			secretID = &auth.SecretID{FromFile: secretIDpath}
 		}
-
-		secretID := &auth.SecretID{FromFile: secretIDpath}
 
 		appRoleAuth, err := auth.NewAppRoleAuth(roleID, secretID)
 		if err != nil {
