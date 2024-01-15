@@ -1,27 +1,27 @@
 package log
 
 import (
-	"encoding/json"
+	"os"
 
 	kratoszap "github.com/go-kratos/kratos/contrib/log/zap/v2"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func NewStdLogger() *kratoszap.Logger {
-	rawJSON := []byte(`{
-		"level": "debug",
-		"encoding": "json",
-		"outputPaths": ["stdout"],
-		"errorOutputPaths": ["stderr"],
-		"encoderConfig": {
-		  "levelKey": "level",
-		  "levelEncoder": "capital"
-		}
-	  }`)
+	cfg := zap.Config{
+		Level:            zap.NewAtomicLevel(),
+		Encoding:         "json",
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+		EncoderConfig: zapcore.EncoderConfig{
+			LevelKey:    "level",
+			EncodeLevel: zapcore.CapitalLevelEncoder,
+		},
+	}
 
-	var cfg zap.Config
-	if err := json.Unmarshal(rawJSON, &cfg); err != nil {
-		panic(err)
+	if os.Getenv("DEBUG") != "" {
+		cfg.Level.SetLevel(zapcore.DebugLevel)
 	}
 
 	zapLogger := zap.Must(cfg.Build())
