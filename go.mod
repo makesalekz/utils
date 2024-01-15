@@ -5,13 +5,15 @@ go 1.19
 require (
 	github.com/go-kratos/consul v0.1.5
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20231121021043-9adece088b51
-	github.com/go-kratos/kratos/v2 v2.7.1
+	github.com/go-kratos/kratos/contrib/log/zap/v2 v2.0.0-20240105030612-34d9666e0e1b
+	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/hashicorp/consul/api v1.26.1
 	github.com/hashicorp/vault/api v1.10.0
 	github.com/hashicorp/vault/api/auth/approle v0.5.0
 	github.com/nats-io/nats.go v1.31.0
-	google.golang.org/grpc v1.56.1
+	go.uber.org/zap v1.26.0
+	google.golang.org/grpc v1.56.3
 	google.golang.org/protobuf v1.31.0
 )
 
@@ -47,6 +49,7 @@ require (
 	github.com/nats-io/nkeys v0.4.5 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/net v0.17.0 // indirect
