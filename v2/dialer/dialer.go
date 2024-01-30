@@ -1,9 +1,7 @@
-package data
+package dialer
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"time"
 
 	"gitlab.calendaria.team/services/utils/v1/config"
@@ -33,15 +31,10 @@ func NewServiceDialer(
 	endpointName string,
 	endpoint string,
 ) (*Dialer, error) {
-	appName := os.Getenv("SERVICE_NAME")
-	if appName == "" {
-		return nil, fmt.Errorf("SERVICE_NAME not found")
-	}
-
 	return &Dialer{
 		discovery:   c.GetRegistry(),
 		jwt:         jwt,
-		jwtIssuer:   appName,
+		jwtIssuer:   c.GetAppName(),
 		jwtAudience: jwtv4.ClaimStrings{endpointName},
 		endpoint:    endpoint,
 		timeout:     30 * time.Second,
