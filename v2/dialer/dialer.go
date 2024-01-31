@@ -16,6 +16,9 @@ import (
 	"google.golang.org/grpc/connectivity"
 )
 
+const CONNECTING_TIMEOUT = 3 * time.Second
+const TRANSIENT_FAILURE_TIMEOUT = 5 * time.Second
+
 type Dialer struct {
 	conn        *ggrpc.ClientConn
 	discovery   *consul.Registry
@@ -67,14 +70,14 @@ func (d *Dialer) Connect(ctx context.Context) (*ggrpc.ClientConn, error) {
 			return d.conn, nil
 		case connectivity.Connecting:
 			// we should wait for connection
-			waitCtx, cancelWait := context.WithTimeout(ctx, 3*time.Second)
+			waitCtx, cancelWait := context.WithTimeout(ctx, CONNECTING_TIMEOUT)
 			defer cancelWait()
 			if d.conn.WaitForStateChange(waitCtx, s) {
 				return d.conn, nil
 			}
 		case connectivity.TransientFailure:
 			// we should wait for connection
-			waitCtx, cancelWait := context.WithTimeout(ctx, 5*time.Second)
+			waitCtx, cancelWait := context.WithTimeout(ctx, TRANSIENT_FAILURE_TIMEOUT)
 			defer cancelWait()
 			if d.conn.WaitForStateChange(waitCtx, s) {
 				return d.conn, nil
