@@ -13,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
 	ggrpc "google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 )
 
 type Dialer struct {
@@ -56,7 +57,31 @@ func (d *Dialer) SetTimeout(timeout time.Duration) *Dialer {
 
 func (d *Dialer) Connect(ctx context.Context) (*ggrpc.ClientConn, error) {
 	if d.conn != nil {
-		return d.conn, nil
+		s := d.conn.GetState()
+		switch s {
+		case connectivity.Idle:
+			// we can use this connection
+			return d.conn, nil
+		case connectivity.Ready:
+			// we can use this connection
+			return d.conn, nil
+		case connectivity.Connecting:
+			// we should wait for connection
+			waitCtx, cancelWait := context.WithTimeout(ctx, 3*time.Second)
+			defer cancelWait()
+			if d.conn.WaitForStateChange(waitCtx, s) {
+				return d.conn, nil
+			}
+		case connectivity.TransientFailure:
+			// we should wait for connection
+			waitCtx, cancelWait := context.WithTimeout(ctx, 5*time.Second)
+			defer cancelWait()
+			if d.conn.WaitForStateChange(waitCtx, s) {
+				return d.conn, nil
+			}
+		case connectivity.Shutdown:
+			// we should reconnect
+		}
 	}
 
 	conn, err := grpc.DialInsecure(
