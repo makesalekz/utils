@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/consul/api v1.26.1
 	github.com/hashicorp/vault/api v1.10.0
 	github.com/hashicorp/vault/api/auth/approle v0.5.0
+	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.31.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.56.3
