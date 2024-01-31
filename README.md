@@ -14,6 +14,10 @@ Consul & Vault config readers
 
 Deprecated gRPC dialer
 
+### error
+
+Lib to check postgres errors
+
 ### jwt
 
 Working with JWT claims
