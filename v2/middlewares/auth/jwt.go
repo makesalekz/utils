@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"gitlab.calendaria.team/services/utils/v1/jwt"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 
+	errors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/go-kratos/kratos/v2/middleware"
 	kjwt "github.com/go-kratos/kratos/v2/middleware/auth/jwt"
@@ -25,17 +27,24 @@ func Server(jwtp *jwt.JwtProcessor) middleware.Middleware {
 // BffMetaServer is a middleware that extracts the actor id and tenant id from the jwt token and adds them to the metadata in global context.
 // It allows to use the actor id and tenant id in the whole service calls chain.
 // Requires the jwt & metadata middlewares to be used before this middleware.
+// Requires user claims to be passed in the jwt token.
 func BffMetaServer(jwtp *jwt.JwtProcessor) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			claims, _ := jwtp.GetClaimsFromContext(ctx)
 
-			if claims.IsUserRequest() {
-				ctx = metadata.AppendToClientContext(ctx, "x-md-global-actor-id", strconv.FormatInt(claims.GetUserId(), 10))
+			if !claims.IsUserRequest() {
+				return nil, errors.New(401, "UNAUTHORIZED", "user claims are required")
 			}
 
-			if claims.IsUserTenantRequest() {
-				ctx = metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(claims.GetTenantId(), 10))
+			actorId := claims.GetUserId()
+			ctx = auth.NewActorContext(ctx, actorId)
+			ctx = metadata.AppendToClientContext(ctx, "x-md-global-actor-id", strconv.FormatInt(actorId, 10))
+
+			tenantId := claims.GetTenantId()
+			if tenantId != 0 {
+				ctx = auth.NewTenantContext(ctx, tenantId)
+				ctx = metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenantId, 10))
 			}
 
 			return handler(ctx, req)
