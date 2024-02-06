@@ -4,11 +4,8 @@ import (
 	"context"
 	"time"
 
-	"gitlab.calendaria.team/services/utils/v1/config"
-	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
 	"gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 
-	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
@@ -19,40 +16,30 @@ import (
 const CONNECTING_TIMEOUT = 3 * time.Second
 const TRANSIENT_FAILURE_TIMEOUT = 5 * time.Second
 
+type IDialer interface {
+	SetEndpoint(endpointName, endpoint string) IDialer
+	SetTimeout(timeout time.Duration) IDialer
+	Connect(ctx context.Context) (*ggrpc.ClientConn, error)
+	Close() error
+}
+
+// Dialer is a service dialer, implements IDialer
 type Dialer struct {
 	conn        *ggrpc.ClientConn
-	discovery   *consul.Registry
-	jwt         *jwtp.JwtProcessor
-	jwtIssuer   string
+	dm          *DialerManager
 	jwtAudience jwtv4.ClaimStrings
 	endpoint    string
 	timeout     time.Duration
 }
 
-func NewServiceDialer(
-	c *config.Config,
-	jwt *jwtp.JwtProcessor,
-	endpointName string,
-	endpoint string,
-) (*Dialer, error) {
-	return &Dialer{
-		discovery:   c.GetRegistry(),
-		jwt:         jwt,
-		jwtIssuer:   c.GetAppName(),
-		jwtAudience: jwtv4.ClaimStrings{endpointName},
-		endpoint:    endpoint,
-		timeout:     30 * time.Second,
-	}, nil
-}
-
-func (d *Dialer) SetEndpoint(endpointName, endpoint string) *Dialer {
+func (d *Dialer) SetEndpoint(endpointName, endpoint string) IDialer {
 	d.endpoint = endpoint
 	d.jwtAudience = jwtv4.ClaimStrings{endpointName}
 
 	return d
 }
 
-func (d *Dialer) SetTimeout(timeout time.Duration) *Dialer {
+func (d *Dialer) SetTimeout(timeout time.Duration) IDialer {
 	d.timeout = timeout
 
 	return d
@@ -90,10 +77,10 @@ func (d *Dialer) Connect(ctx context.Context) (*ggrpc.ClientConn, error) {
 	conn, err := grpc.DialInsecure(
 		ctx,
 		grpc.WithEndpoint(d.endpoint),
-		grpc.WithDiscovery(d.discovery),
+		grpc.WithDiscovery(d.dm.discovery),
 		grpc.WithTimeout(d.timeout),
 		grpc.WithMiddleware(
-			auth.Client(d.jwt, d.jwtIssuer, d.jwtAudience),
+			auth.Client(d.dm.jwt, d.dm.jwtIssuer, d.jwtAudience),
 			metadata.Client(),
 		),
 	)
