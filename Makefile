@@ -31,3 +31,8 @@ api:
 			--go_out=paths=source_relative:. \
 			--openapi_out=fq_schema_naming=true,default_response=false:. \
 			$(API_PROTO_FILES);
+
+.PHONY: mock
+mock:
+	mockgen -source v2/dialer/dialer.go -destination v2/dialer/mock/dialer.go -package dialer_mock
+	mockgen -source v2/dialer/dialer_manager.go -destination v2/dialer/mock/dialer_manager.go -package dialer_mock
