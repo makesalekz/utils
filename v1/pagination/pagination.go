@@ -1,8 +1,6 @@
 package pagination
 
 import (
-	"math"
-
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
@@ -23,7 +21,7 @@ func InitializePagination(pagination *utils_v1.PaginateRequest) {
 }
 
 // UpdatePaginationForAroundId resets pagination for around id, returns actual limit, because pagination.limit changes for second request
-func UpdatePaginationForAroundId(lenList int32, pagination *utils_v1.PaginateRequest) int32 {
+func UpdatePaginationForAroundId(pagination *utils_v1.PaginateRequest, lenList int32) int32 {
 	// save actual limit, because pagination.limit changes for second request
 	actualLimit := pagination.Limit
 
@@ -33,7 +31,7 @@ func UpdatePaginationForAroundId(lenList int32, pagination *utils_v1.PaginateReq
 
 	// update limit for second request, half of limit or not enough part of list by first request
 	if pagination.Limit != lenList {
-		pagination.Limit = int32(math.Max(float64(pagination.Limit-lenList), float64(pagination.Limit/2)))
+		pagination.Limit = max(pagination.Limit-lenList, pagination.Limit/2)
 	} else {
 		pagination.Limit /= 2
 	}
@@ -58,10 +56,10 @@ func GetListForAroundId[S ~[]E, E any](list1, list2 S, actualLimit int32, isDesc
 
 	// calculate how many elements to cut from each list
 	if len(list1) >= len(list2) {
-		cutList2 = int32(math.Min(float64(lenList2), float64(actualLimit/2)))
+		cutList2 = min(lenList2, actualLimit/2)
 		cutList1 = actualLimit - cutList2
 	} else {
-		cutList1 = int32(math.Min(float64(lenList1), float64(actualLimit/2)))
+		cutList1 = min(lenList1, actualLimit/2)
 		cutList2 = actualLimit - cutList1
 	}
 
