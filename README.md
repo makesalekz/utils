@@ -38,6 +38,11 @@ Custom metrics middlewares
 
 QueueManager to handle simple nats queues
 
+### pagination
+
+Pagination lib to initialize and update for "around" parameter.
+Also concatenates 2 results by limit requested with "around" parameter.
+
 ## v2
 
 ### auth

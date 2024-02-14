@@ -1,8 +1,9 @@
 package pagination
 
 import (
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 	"math"
+
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 // defaul limit for all services
@@ -23,10 +24,14 @@ func InitializePagination(pagination *utils_v1.PaginateRequest) {
 
 // UpdatePaginationForAroundId resets pagination for around id, returns actual limit, because pagination.limit changes for second request
 func UpdatePaginationForAroundId(lenList int32, pagination *utils_v1.PaginateRequest) int32 {
+	// save actual limit, because pagination.limit changes for second request
 	actualLimit := pagination.Limit
 
+	// set from id to around id and reset around id for second request
 	pagination.FromId = pagination.AroundId
 	pagination.AroundId = 0
+
+	// update limit for second request, half of limit or not enough part of list by first request
 	if pagination.Limit != lenList {
 		pagination.Limit = int32(math.Max(float64(pagination.Limit-lenList), float64(pagination.Limit/2)))
 	} else {
