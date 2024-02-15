@@ -1,6 +1,6 @@
 module gitlab.calendaria.team/services/utils
 
-go 1.19
+go 1.21
 
 require (
 	github.com/go-kratos/consul v0.1.5
