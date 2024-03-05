@@ -53,3 +53,13 @@ func GetTenantIdFromContext(ctx context.Context) int64 {
 	}
 	return 0
 }
+
+func AppendAuthIds(ctx context.Context, userId, tenantId int64) context.Context {
+	ctx = metadata.AppendToClientContext(ctx, "x-md-global-actor-id", strconv.FormatInt(userId, 10))
+
+	if tenantId != 0 {
+		ctx = metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenantId, 10))
+	}
+
+	return ctx
+}
