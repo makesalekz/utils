@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.calendaria.team/services/utils/v1/jwt"
@@ -45,6 +46,11 @@ func BffMetaServer(jwtp *jwt.JwtProcessor) middleware.Middleware {
 			if tenantId != 0 {
 				ctx = auth.NewTenantContext(ctx, tenantId)
 				ctx = metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenantId, 10))
+
+				identities := claims.GetIdentities()
+				if len(identities) > 0 {
+					ctx = metadata.AppendToClientContext(ctx, "x-md-global-identities", strings.Join(identities, ","))
+				}
 			}
 
 			return handler(ctx, req)
