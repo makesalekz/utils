@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2/metadata"
 )
@@ -54,11 +55,25 @@ func GetTenantIdFromContext(ctx context.Context) int64 {
 	return 0
 }
 
-func AppendAuthIds(ctx context.Context, userId, tenantId int64) context.Context {
+func GetIdentitiesFromContext(ctx context.Context) []string {
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		idString := md.Get("x-md-global-identities")
+		if idString != "" {
+			return strings.Split(idString, ",")
+		}
+	}
+	return nil
+}
+
+func AppendAuthIds(ctx context.Context, userId, tenantId int64, identities ...string) context.Context {
 	ctx = metadata.AppendToClientContext(ctx, "x-md-global-actor-id", strconv.FormatInt(userId, 10))
 
 	if tenantId != 0 {
 		ctx = metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenantId, 10))
+
+		if len(identities) > 0 {
+			ctx = metadata.AppendToClientContext(ctx, "x-md-global-identities", strings.Join(identities, ","))
+		}
 	}
 
 	return ctx
