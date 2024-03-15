@@ -66,6 +66,7 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 		if !handler(ctx, m) {
 			retryCountStr := m.Header.Get("X-Retry-Count")
 			if retryCountStr == "" {
+				m.Header = map[string][]string{"X-Retry-Count": {"0"}}
 				retryCountStr = "0"
 			}
 			retryCount, err := strconv.ParseInt(retryCountStr, 10, 64)
@@ -79,7 +80,7 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 			retryCount++
 
 			fmt.Println("msg header", m.Header)
-			m.Header.Add("X-Retry-Count", strconv.FormatInt(retryCount, 10))
+			m.Header.Set("X-Retry-Count", strconv.FormatInt(retryCount, 10))
 			_ = m.NakWithDelay(delay)
 		}
 	})
