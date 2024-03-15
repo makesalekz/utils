@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -77,6 +78,7 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 			delay := delays[retryCount]
 			retryCount++
 
+			fmt.Println("msg header", m.Header)
 			m.Header.Add("X-Retry-Count", strconv.FormatInt(retryCount, 10))
 			_ = m.NakWithDelay(delay)
 		}
