@@ -37,8 +37,3 @@ bin/
 .vscode/
 .idea/
 *.swp
-
-# Local env
-.env
-.docker
-config.yaml

@@ -2,7 +2,9 @@ package nats
 
 import (
 	"context"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/nats-io/nats.go"
@@ -43,10 +45,40 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 	subj := qm.appName + "/" + name
 	queue := qm.GetLocal(name)
 
+	//delays := []time.Duration{
+	//	1 * time.Minute,
+	//	5 * time.Minute,
+	//	30 * time.Minute,
+	//	3 * time.Hour,
+	//}
+
+	delays := []time.Duration{
+		1 * time.Second,
+		5 * time.Second,
+		30 * time.Second,
+		1 * time.Minute,
+	}
+
 	ctx := context.WithValue(context.Background(), queueKey{}, queue)
 	_, err := qm.nc.QueueSubscribe(subj, "workers", func(m *nats.Msg) {
+
 		if !handler(ctx, m) {
-			m.Nak()
+			retryCountStr := m.Header.Get("X-Retry-Count")
+			if retryCountStr == "" {
+				retryCountStr = "0"
+			}
+			retryCount, err := strconv.ParseInt(retryCountStr, 10, 64)
+			if err != nil {
+				retryCount = 0
+			}
+			if retryCount > int64(len(delays)) {
+				return
+			}
+			delay := delays[retryCount]
+			retryCount++
+
+			m.Header.Set("X-Retry-Count", strconv.FormatInt(retryCount, 10))
+			_ = m.NakWithDelay(delay)
 		}
 	})
 
