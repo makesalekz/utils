@@ -77,7 +77,7 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 			delay := delays[retryCount]
 			retryCount++
 
-			m.Header.Set("X-Retry-Count", strconv.FormatInt(retryCount, 10))
+			m.Header.Add("X-Retry-Count", strconv.FormatInt(retryCount, 10))
 			_ = m.NakWithDelay(delay)
 		}
 	})
