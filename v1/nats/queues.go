@@ -81,7 +81,11 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 
 			fmt.Println("msg header", m.Header)
 			m.Header.Set("X-Retry-Count", strconv.FormatInt(retryCount, 10))
-			_ = m.NakWithDelay(delay)
+			fmt.Println("msg header", m.Header)
+			fmt.Println("delay: ", delay)
+			err = m.NakWithDelay(delay)
+			fmt.Println("err: ", err)
+			fmt.Println("msg header", m.Header)
 		}
 	})
 
