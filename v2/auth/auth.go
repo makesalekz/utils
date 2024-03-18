@@ -19,6 +19,13 @@ func NewTenantContext(ctx context.Context, tenantId int64) context.Context {
 	return context.WithValue(ctx, tenantKey{}, tenantId)
 }
 
+func GetAppIdFromContext(ctx context.Context) string {
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		return md.Get("x-md-global-app-id")
+	}
+	return ""
+}
+
 func GetActorIdFromContext(ctx context.Context) int64 {
 	actorId, ok := ctx.Value(actorKey{}).(int64)
 	if ok {
