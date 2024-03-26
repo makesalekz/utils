@@ -29,7 +29,7 @@ func Server(jwtp *jwt.JwtProcessor) middleware.Middleware {
 // It allows to use the actor id and tenant id in the whole service calls chain.
 // Requires the jwt & metadata middlewares to be used before this middleware.
 // Requires user claims to be passed in the jwt token.
-func BffMetaServer(jwtp *jwt.JwtProcessor) middleware.Middleware {
+func BffMetaServer(jwtp *jwt.JwtProcessor, appId string) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			claims, _ := jwtp.GetClaimsFromContext(ctx)
@@ -41,6 +41,10 @@ func BffMetaServer(jwtp *jwt.JwtProcessor) middleware.Middleware {
 			actorId := claims.GetUserId()
 			ctx = auth.NewActorContext(ctx, actorId)
 			ctx = metadata.AppendToClientContext(ctx, "x-md-global-actor-id", strconv.FormatInt(actorId, 10))
+
+			if appId != "" {
+				ctx = metadata.AppendToClientContext(ctx, "x-md-global-app-id", appId)
+			}
 
 			tenantId := claims.GetTenantId()
 			if tenantId != 0 {
