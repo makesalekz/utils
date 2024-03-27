@@ -8,9 +8,9 @@ import (
 const PAGINATION_LIMIT = 100
 
 // InitializePagination initializes pagination with default limit if not provided
-func InitializePagination(pagination *utils_v1.PaginateRequest) utils_v1.PaginateRequest {
+func InitializePagination(pagination *utils_v1.PaginateRequest) *utils_v1.PaginateRequest {
 	if pagination == nil {
-		return utils_v1.PaginateRequest{
+		return &utils_v1.PaginateRequest{
 			Limit: PAGINATION_LIMIT,
 		}
 	}
@@ -19,7 +19,7 @@ func InitializePagination(pagination *utils_v1.PaginateRequest) utils_v1.Paginat
 		pagination.Limit = PAGINATION_LIMIT
 	}
 
-	return *pagination
+	return pagination
 }
 
 // UpdatePaginationForAroundId resets pagination for around id, returns actual limit, because pagination.limit changes for second request
