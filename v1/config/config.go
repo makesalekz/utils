@@ -53,7 +53,9 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("Source '%s' is not found: %w", appPath, err)
 	}
 
-	cfg := kconfig.New(kconfig.WithSource(env.NewSource(""), globalSource, source))
+	envPrefix := os.Getenv("ENV_PREFIX")
+
+	cfg := kconfig.New(kconfig.WithSource(env.NewSource(envPrefix), globalSource, source))
 	if err := cfg.Load(); err != nil {
 		return nil, err
 	}
