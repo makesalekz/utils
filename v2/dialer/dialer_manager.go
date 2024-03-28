@@ -3,11 +3,12 @@ package dialer
 import (
 	"time"
 
-	"gitlab.calendaria.team/services/utils/v1/config"
-	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
+	u_config "gitlab.calendaria.team/services/utils/v1/config"
+	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
+	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
 
 	consul "github.com/go-kratos/consul/registry"
-	jwtv4 "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type IDialerManager interface {
@@ -17,16 +18,19 @@ type IDialerManager interface {
 // DialerManager is a service dialer manager
 type DialerManager struct {
 	discovery *consul.Registry
-	jwt       *jwtp.JwtProcessor
+	tracer    *u_tracing.Tracer
+	jwt       *u_jwt.JwtProcessor
 	jwtIssuer string
 }
 
 func NewServiceDialerManager(
-	c *config.Config,
-	jwt *jwtp.JwtProcessor,
+	c *u_config.Config,
+	tracer *u_tracing.Tracer,
+	jwt *u_jwt.JwtProcessor,
 ) (IDialerManager, error) {
 	return &DialerManager{
 		discovery: c.GetRegistry(),
+		tracer:    tracer,
 		jwt:       jwt,
 		jwtIssuer: c.GetAppName(),
 	}, nil
@@ -38,7 +42,7 @@ func (dm *DialerManager) NewServiceDialer(
 ) (IDialer, error) {
 	return &Dialer{
 		dm:          dm,
-		jwtAudience: jwtv4.ClaimStrings{endpointName},
+		jwtAudience: jwt.ClaimStrings{endpointName},
 		endpoint:    endpoint,
 		timeout:     30 * time.Second,
 	}, nil
