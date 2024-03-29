@@ -44,12 +44,12 @@ func (t *Tracer) Initialize() error {
 		if endpoint == "" {
 			return nil
 		}
-		exp, err = otlptracehttp.New(context.Background(), otlptracehttp.WithEndpoint(endpoint))
+		exp, err = otlptracehttp.New(context.Background(), otlptracehttp.WithEndpoint(endpoint), otlptracehttp.WithInsecure())
 		if err != nil {
 			return err
 		}
 	} else {
-		exp, err = otlptracegrpc.New(context.Background(), otlptracegrpc.WithEndpoint(endpoint))
+		exp, err = otlptracegrpc.New(context.Background(), otlptracegrpc.WithEndpoint(endpoint), otlptracegrpc.WithInsecure())
 		if err != nil {
 			return err
 		}
