@@ -47,7 +47,7 @@ Also concatenates 2 results by limit requested with "around" parameter.
 
 ### auth
 
-Getters for ActorId and TenantId from metadata
+Getters for ActorId, TenantId, AppId, Identities from metadata
 
 ### v2/dialer
 
@@ -60,3 +60,7 @@ Refactored JWT server & client middlewares:
 - JWT Server – unchanged
 - JWT Client – sends s2s token instead of user ID token
 - BFF Meta Server – appends actor ID & tenant ID as metadata to context, to send them in s2s calls
+
+### zap
+
+Zap logger with JSON formatting
