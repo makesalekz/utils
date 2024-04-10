@@ -8,6 +8,7 @@ import (
 	"github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
 	kconfig "github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/config/env"
 	"github.com/hashicorp/consul/api"
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/approle"
@@ -52,7 +53,9 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("Source '%s' is not found: %w", appPath, err)
 	}
 
-	cfg := kconfig.New(kconfig.WithSource(globalSource, source))
+	envPrefix := os.Getenv("ENV_PREFIX")
+
+	cfg := kconfig.New(kconfig.WithSource(env.NewSource(envPrefix), globalSource, source))
 	if err := cfg.Load(); err != nil {
 		return nil, err
 	}
@@ -81,7 +84,7 @@ func (c *Config) GetVault(ctx context.Context) (*vault.Client, error) {
 
 	vconf := vault.DefaultConfig()
 
-	vaultAddress := os.Getenv("VAULT_ADDRESS")
+	vaultAddress, _ := c.Value("VAULT_ADDRESS").String()
 	if vaultAddress != "" {
 		vconf.Address = vaultAddress
 	}
@@ -91,17 +94,17 @@ func (c *Config) GetVault(ctx context.Context) (*vault.Client, error) {
 		return nil, fmt.Errorf("Unable to initialize Vault client: %w", err)
 	}
 
-	token := os.Getenv("VAULT_TOKEN")
+	token, _ := c.Value("VAULT_TOKEN").String()
 	if token == "" {
-		roleID := os.Getenv("VAULT_ROLE_ID")
+		roleID, _ := c.Value("VAULT_ROLE_ID").String()
 		if roleID == "" {
 			return nil, fmt.Errorf("No role ID was provided in VAULT_ROLE_ID env var")
 		}
 
 		var secretID *auth.SecretID
-		secretIDpath := os.Getenv("VAULT_SECRET_ID_PATH")
+		secretIDpath, _ := c.Value("VAULT_SECRET_ID_PATH").String()
 		if secretIDpath == "" {
-			secretIDstring := os.Getenv("VAULT_SECRET_ID")
+			secretIDstring, _ := c.Value("VAULT_SECRET_ID").String()
 			if secretIDstring == "" {
 				return nil, fmt.Errorf("No secret ID file path was provided in VAULT_SECRET_ID/VAULT_SECRET_ID_PATH env vars")
 			}

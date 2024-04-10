@@ -4,11 +4,13 @@ import (
 	"context"
 	"time"
 
-	"gitlab.calendaria.team/services/utils/v2/middlewares/auth"
+	u_auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	jwtv4 "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	ggrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 )
@@ -27,14 +29,14 @@ type IDialer interface {
 type Dialer struct {
 	conn        *ggrpc.ClientConn
 	dm          *DialerManager
-	jwtAudience jwtv4.ClaimStrings
+	jwtAudience jwt.ClaimStrings
 	endpoint    string
 	timeout     time.Duration
 }
 
 func (d *Dialer) SetEndpoint(endpointName, endpoint string) IDialer {
 	d.endpoint = endpoint
-	d.jwtAudience = jwtv4.ClaimStrings{endpointName}
+	d.jwtAudience = jwt.ClaimStrings{endpointName}
 
 	return d
 }
@@ -74,15 +76,21 @@ func (d *Dialer) Connect(ctx context.Context) (*ggrpc.ClientConn, error) {
 		}
 	}
 
+	middlewares := []middleware.Middleware{
+		u_auth.Client(d.dm.jwt, d.dm.jwtIssuer, d.jwtAudience),
+		metadata.Client(),
+	}
+
+	if d.dm.tracer.IsInitialized() {
+		middlewares = append(middlewares, tracing.Client())
+	}
+
 	conn, err := grpc.DialInsecure(
 		ctx,
 		grpc.WithEndpoint(d.endpoint),
 		grpc.WithDiscovery(d.dm.discovery),
 		grpc.WithTimeout(d.timeout),
-		grpc.WithMiddleware(
-			auth.Client(d.dm.jwt, d.dm.jwtIssuer, d.jwtAudience),
-			metadata.Client(),
-		),
+		grpc.WithMiddleware(middlewares...),
 	)
 	if err != nil {
 		return nil, err

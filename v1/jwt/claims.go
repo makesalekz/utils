@@ -3,11 +3,11 @@ package jwt
 import (
 	"strconv"
 
-	jwtv4 "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type TenantClaims struct {
-	jwtv4.RegisteredClaims
+	jwt.RegisteredClaims
 
 	userId    *int64
 	TenantId  int64    `json:"tenant,omitempty"`
