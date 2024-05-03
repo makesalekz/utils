@@ -1,5 +1,7 @@
 package struc
 
+import "slices"
+
 // ------------------------------- Structs -----------------------------
 
 type FirebaseNotification struct {
@@ -33,15 +35,10 @@ func (NotificationType) Values() (kinds []string) {
 	return
 }
 
-func (m NotificationType) Value() string {
-	return string(m)
+func (t NotificationType) Value() string {
+	return string(t)
 }
 
-func (m NotificationType) IsValid() bool {
-	for _, value := range notificationTypeValues() {
-		if m == value {
-			return true
-		}
-	}
-	return false
+func (t NotificationType) IsValid() bool {
+	return slices.Contains(notificationTypeValues(), t)
 }
