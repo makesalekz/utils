@@ -39,6 +39,15 @@ func (qm *QueueManager) GetLocal(name string) *Queue {
 	return queue
 }
 
+func (qm *QueueManager) GetRemote(subj string) *Queue {
+	queue := qm.getQueue(subj)
+	if queue == nil {
+		queue = qm.initQueue(subj)
+	}
+
+	return queue
+}
+
 func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Context, m *nats.Msg) bool) {
 	subj := qm.appName + "/" + name
 	queue := qm.GetLocal(name)
@@ -55,13 +64,19 @@ func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Contex
 	}
 }
 
-func (qm *QueueManager) GetRemote(subj string) *Queue {
-	queue := qm.getQueue(subj)
-	if queue == nil {
-		queue = qm.initQueue(subj)
-	}
+func (qm *QueueManager) AddRemoteConsumer(name string, handler func(ctx context.Context, m *nats.Msg) bool) {
+	queue := qm.GetRemote(name)
 
-	return queue
+	ctx := context.WithValue(context.Background(), queueKey{}, queue)
+	_, err := qm.nc.QueueSubscribe(name, "workers", func(m *nats.Msg) {
+		if !handler(ctx, m) {
+			m.Nak()
+		}
+	})
+
+	if err != nil {
+		qm.log.Errorf("nc.QueueSubscribe: %s", err.Error())
+	}
 }
 
 func (qm *QueueManager) getQueue(subj string) *Queue {
