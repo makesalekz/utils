@@ -48,12 +48,12 @@ func (qm *QueueManager) GetRemote(subj string) *Queue {
 	return queue
 }
 
-func (qm *QueueManager) AddConsumer(name string, queueName string, handler func(ctx context.Context, m *nats.Msg) bool) {
+func (qm *QueueManager) AddConsumer(name string, handler func(ctx context.Context, m *nats.Msg) bool) {
 	subj := qm.appName + "/" + name
 	queue := qm.GetLocal(name)
 
 	ctx := context.WithValue(context.Background(), queueKey{}, queue)
-	_, err := qm.nc.QueueSubscribe(subj, queueName, func(m *nats.Msg) {
+	_, err := qm.nc.QueueSubscribe(subj, "workers", func(m *nats.Msg) {
 		if !handler(ctx, m) {
 			m.Nak()
 		}
