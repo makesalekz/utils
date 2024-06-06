@@ -9,6 +9,12 @@ import (
 	"gitlab.calendaria.team/services/utils/v1/config"
 )
 
+type IQueueManager interface {
+	GetLocal(name string) *Queue
+	GetRemote(subj string) *Queue
+	AddConsumer(name string, handler func(ctx context.Context, m *nats.Msg) bool)
+}
+
 type QueueManager struct {
 	nc      *nats.EncodedConn
 	log     *log.Helper
@@ -17,7 +23,7 @@ type QueueManager struct {
 	queues  map[string]*Queue
 }
 
-func NewQueueManager(c *config.Config, nc *nats.EncodedConn, logger log.Logger) *QueueManager {
+func NewQueueManager(c *config.Config, nc *nats.EncodedConn, logger log.Logger) IQueueManager {
 	return &QueueManager{
 		nc:      nc,
 		log:     log.NewHelper(logger),
