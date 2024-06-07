@@ -83,6 +83,18 @@ func (mr *MockIQueueManagerMockRecorder) AddConsumer(name, handler interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddConsumer", reflect.TypeOf((*MockIQueueManager)(nil).AddConsumer), name, handler)
 }
 
+// AddRemoteConsumer mocks base method.
+func (m *MockIQueueManager) AddRemoteConsumer(name, queueName string, handler func(context.Context, *nats.Msg) bool) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddRemoteConsumer", name, queueName, handler)
+}
+
+// AddRemoteConsumer indicates an expected call of AddRemoteConsumer.
+func (mr *MockIQueueManagerMockRecorder) AddRemoteConsumer(name, queueName, handler interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddRemoteConsumer", reflect.TypeOf((*MockIQueueManager)(nil).AddRemoteConsumer), name, queueName, handler)
+}
+
 // GetLocal mocks base method.
 func (m *MockIQueueManager) GetLocal(name string) nats0.IQueue {
 	m.ctrl.T.Helper()
