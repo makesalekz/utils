@@ -9,10 +9,15 @@ import (
 	"gitlab.calendaria.team/services/utils/v1/config"
 )
 
+type IQueue interface {
+	Pub(data any)
+}
+
 type IQueueManager interface {
-	GetLocal(name string) *Queue
-	GetRemote(subj string) *Queue
+	GetLocal(name string) IQueue
+	GetRemote(subj string) IQueue
 	AddConsumer(name string, handler func(ctx context.Context, m *nats.Msg) bool)
+	AddRemoteConsumer(name string, queueName string, handler func(ctx context.Context, m *nats.Msg) bool)
 }
 
 type QueueManager struct {
@@ -34,7 +39,7 @@ func NewQueueManager(c *config.Config, nc *nats.EncodedConn, logger log.Logger) 
 
 type queueKey struct{}
 
-func (qm *QueueManager) GetLocal(name string) *Queue {
+func (qm *QueueManager) GetLocal(name string) IQueue {
 	subj := qm.appName + "/" + name
 
 	queue := qm.getQueue(subj)
@@ -45,7 +50,7 @@ func (qm *QueueManager) GetLocal(name string) *Queue {
 	return queue
 }
 
-func (qm *QueueManager) GetRemote(subj string) *Queue {
+func (qm *QueueManager) GetRemote(subj string) IQueue {
 	queue := qm.getQueue(subj)
 	if queue == nil {
 		queue = qm.initQueue(subj)
