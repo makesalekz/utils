@@ -13,6 +13,41 @@ import (
 	nats0 "gitlab.calendaria.team/services/utils/v1/nats"
 )
 
+// MockIQueue is a mock of IQueue interface.
+type MockIQueue struct {
+	ctrl     *gomock.Controller
+	recorder *MockIQueueMockRecorder
+}
+
+// MockIQueueMockRecorder is the mock recorder for MockIQueue.
+type MockIQueueMockRecorder struct {
+	mock *MockIQueue
+}
+
+// NewMockIQueue creates a new mock instance.
+func NewMockIQueue(ctrl *gomock.Controller) *MockIQueue {
+	mock := &MockIQueue{ctrl: ctrl}
+	mock.recorder = &MockIQueueMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIQueue) EXPECT() *MockIQueueMockRecorder {
+	return m.recorder
+}
+
+// Pub mocks base method.
+func (m *MockIQueue) Pub(data any) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Pub", data)
+}
+
+// Pub indicates an expected call of Pub.
+func (mr *MockIQueueMockRecorder) Pub(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pub", reflect.TypeOf((*MockIQueue)(nil).Pub), data)
+}
+
 // MockIQueueManager is a mock of IQueueManager interface.
 type MockIQueueManager struct {
 	ctrl     *gomock.Controller
@@ -49,10 +84,10 @@ func (mr *MockIQueueManagerMockRecorder) AddConsumer(name, handler interface{}) 
 }
 
 // GetLocal mocks base method.
-func (m *MockIQueueManager) GetLocal(name string) *nats0.Queue {
+func (m *MockIQueueManager) GetLocal(name string) nats0.IQueue {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLocal", name)
-	ret0, _ := ret[0].(*nats0.Queue)
+	ret0, _ := ret[0].(nats0.IQueue)
 	return ret0
 }
 
@@ -63,10 +98,10 @@ func (mr *MockIQueueManagerMockRecorder) GetLocal(name interface{}) *gomock.Call
 }
 
 // GetRemote mocks base method.
-func (m *MockIQueueManager) GetRemote(subj string) *nats0.Queue {
+func (m *MockIQueueManager) GetRemote(subj string) nats0.IQueue {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRemote", subj)
-	ret0, _ := ret[0].(*nats0.Queue)
+	ret0, _ := ret[0].(nats0.IQueue)
 	return ret0
 }
 
