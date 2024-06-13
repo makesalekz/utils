@@ -9,22 +9,22 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 )
 
+type errorFunc func(format string, args ...interface{}) *errors.Error
+
 type ErrorHelper struct {
 	log              *log.Helper
-	errorWrapperFunc func(format string, args ...interface{}) *errors.Error
+	errorWrapperFunc errorFunc
 	debug            bool
 }
 
 func NewErrorHelper(
 	logger log.Logger,
-	errorWrapperFunc func(format string, args ...interface{}) *errors.Error,
 ) *ErrorHelper {
 	debug := os.Getenv("DEBUG")
 
 	return &ErrorHelper{
-		log:              log.NewHelper(logger),
-		debug:            debug != "",
-		errorWrapperFunc: errorWrapperFunc,
+		log:   log.NewHelper(logger),
+		debug: debug != "",
 	}
 }
 
@@ -43,7 +43,8 @@ func (h *ErrorHelper) wrapError(err error) error {
 	return err
 }
 
-func (h *ErrorHelper) Build() middleware.Middleware {
+func (h *ErrorHelper) Build(wrapperFunc errorFunc) middleware.Middleware {
+	h.errorWrapperFunc = wrapperFunc
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (interface{}, error) {
 			reply, err := handler(ctx, req)
