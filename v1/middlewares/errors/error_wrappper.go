@@ -29,6 +29,10 @@ func NewErrorHelper(
 }
 
 func (h *ErrorHelper) wrapError(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	if h.debug {
 		return err
 	}
