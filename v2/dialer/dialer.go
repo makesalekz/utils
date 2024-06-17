@@ -6,6 +6,7 @@ import (
 
 	u_auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -13,6 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	ggrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	gmetadata "google.golang.org/grpc/metadata"
 )
 
 const CONNECTING_TIMEOUT = 3 * time.Second
@@ -107,4 +109,20 @@ func (d *Dialer) Close() error {
 	}
 
 	return d.conn.Close()
+}
+
+func InvokeMetadata[Request any, Reply any](ctx context.Context, req *Request, caller func(ctx context.Context, in *Request, opts ...ggrpc.CallOption) (*Reply, error)) (*Reply, error) {
+	md := gmetadata.MD{}
+
+	reply, err := caller(ctx, req, ggrpc.Trailer(&md))
+	if err != nil {
+		e := errors.FromError(err)
+		e.Metadata = make(map[string]string)
+		for k, v := range md {
+			e.Metadata[k] = v[0]
+		}
+		return nil, e
+	}
+
+	return reply, nil
 }
