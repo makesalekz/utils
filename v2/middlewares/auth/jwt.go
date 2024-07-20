@@ -35,6 +35,8 @@ func BffMetaServer(jwtp *u_jwt.JwtProcessor, appId string) middleware.Middleware
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			claims, _ := jwtp.GetClaimsFromContext(ctx)
 
+			fmt.Printf("bff meta claims=%v\n", claims)
+
 			if !claims.IsUserRequest() {
 				return nil, errors.New(401, "UNAUTHORIZED", "user claims are required")
 			}
