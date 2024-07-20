@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -71,12 +72,16 @@ func Client(
 	return kjwt.Client(func(token *jwt.Token) (interface{}, error) {
 		return jwtp.GetSecret(), nil
 	}, kjwt.WithSigningMethod(jwt.SigningMethodHS256), kjwt.WithClaims(func() jwt.Claims {
+		expireAt := time.Now().Add(S2S_TOKEN_DURATION)
+
+		fmt.Printf("jwt issuer=%s audience=%v expireAt=%v\n", issuer, audience, expireAt)
+
 		return &jwt.RegisteredClaims{
 			Issuer:    issuer,
 			Audience:  audience,
 			Subject:   "s2s",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(S2S_TOKEN_DURATION)),
+			ExpiresAt: jwt.NewNumericDate(expireAt),
 		}
 	}))
 }
