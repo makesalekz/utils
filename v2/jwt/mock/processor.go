@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	jwt "gitlab.calendaria.team/services/utils/v1/jwt"
+	jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 )
 
 // MockIJwtProcessor is a mock of IJwtProcessor interface.
@@ -36,10 +36,10 @@ func (m *MockIJwtProcessor) EXPECT() *MockIJwtProcessorMockRecorder {
 }
 
 // GetClaimsFromContext mocks base method.
-func (m *MockIJwtProcessor) GetClaimsFromContext(ctx context.Context) (*jwt.TenantClaims, bool) {
+func (m *MockIJwtProcessor) GetClaimsFromContext(ctx context.Context) (jwt.ITenantClaims, bool) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetClaimsFromContext", ctx)
-	ret0, _ := ret[0].(*jwt.TenantClaims)
+	ret0, _ := ret[0].(jwt.ITenantClaims)
 	ret1, _ := ret[1].(bool)
 	return ret0, ret1
 }
