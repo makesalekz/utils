@@ -41,9 +41,14 @@ func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) (ITenantClaims,
 		return nil, false
 	}
 
-	claims, ok := token.(*u_jwt.TenantClaims)
+	var claims ITenantClaims
+
+	claims, ok = token.(*u_jwt.TenantClaims)
 	if !ok {
-		return nil, false
+		claims, ok = token.(*TenantClaims) // v2.TenantClaims
+		if !ok {
+			return nil, false
+		}
 	}
 
 	return claims, true
