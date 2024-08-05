@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
 	u_auth "gitlab.calendaria.team/services/utils/v2/auth"
+	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/metadata"
@@ -19,17 +19,20 @@ import (
 const S2S_TOKEN_DURATION = 60 * time.Minute
 
 // Server is a middleware that extracts the claims from the jwt token and adds them to the context.
-func Server(jwtp *u_jwt.JwtProcessor) middleware.Middleware {
-	return kjwt.Server(func(token *jwt.Token) (interface{}, error) {
-		return jwtp.GetSecret(), nil
-	}, kjwt.WithSigningMethod(jwt.SigningMethodHS256), kjwt.WithClaims(func() jwt.Claims { return &u_jwt.TenantClaims{} }))
+func Server(jwtp u_jwt.IJwtProcessor) middleware.Middleware {
+	return kjwt.Server(
+		func(token *jwt.Token) (interface{}, error) {
+			return jwtp.GetSecret(), nil
+		}, kjwt.WithSigningMethod(jwt.SigningMethodHS256),
+		kjwt.WithClaims(func() jwt.Claims { return &u_jwt.TenantClaims{} }),
+	)
 }
 
 // BffMetaServer is a middleware that extracts the actor id and tenant id from the jwt token and adds them to the metadata in global context.
 // It allows to use the actor id and tenant id in the whole service calls chain.
 // Requires the jwt & metadata middlewares to be used before this middleware.
 // Requires user claims to be passed in the jwt token.
-func BffMetaServer(jwtp *u_jwt.JwtProcessor, appId string) middleware.Middleware {
+func BffMetaServer(jwtp u_jwt.IJwtProcessor, appId string) middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			claims, _ := jwtp.GetClaimsFromContext(ctx)
@@ -64,19 +67,23 @@ func BffMetaServer(jwtp *u_jwt.JwtProcessor, appId string) middleware.Middleware
 
 // Client is a middleware that adds the jwt token to the client grpc request.
 func Client(
-	jwtp *u_jwt.JwtProcessor,
+	jwtp u_jwt.IJwtProcessor,
 	issuer string,
 	audience jwt.ClaimStrings,
 ) middleware.Middleware {
-	return kjwt.Client(func(token *jwt.Token) (interface{}, error) {
-		return jwtp.GetSecret(), nil
-	}, kjwt.WithSigningMethod(jwt.SigningMethodHS256), kjwt.WithClaims(func() jwt.Claims {
-		return &jwt.RegisteredClaims{
-			Issuer:    issuer,
-			Audience:  audience,
-			Subject:   "s2s",
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(S2S_TOKEN_DURATION)),
-		}
-	}))
+	return kjwt.Client(
+		func(token *jwt.Token) (interface{}, error) {
+			return jwtp.GetSecret(), nil
+		}, kjwt.WithSigningMethod(jwt.SigningMethodHS256), kjwt.WithClaims(
+			func() jwt.Claims {
+				return &jwt.RegisteredClaims{
+					Issuer:    issuer,
+					Audience:  audience,
+					Subject:   "s2s",
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(S2S_TOKEN_DURATION)),
+				}
+			},
+		),
+	)
 }
