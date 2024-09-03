@@ -142,7 +142,7 @@ func (c *Config) ReadGlobalSecretsFor(ctx context.Context, subpath string) (map[
 
 	secret, err := vault.KVv2("secret").Get(ctx, "app/global/"+subpath)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read global secret (%s): %w", subpath, err)
+		return nil, fmt.Errorf("Unable to read global secret (%s): %s", subpath, err.Error())
 	}
 
 	return secret.Data, nil
@@ -156,8 +156,27 @@ func (c *Config) ReadSecretsFor(ctx context.Context, subpath string) (map[string
 
 	secret, err := vault.KVv2("secret").Get(ctx, c.appPath+subpath)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to read app secret (%s): %w", subpath, err)
+		return nil, fmt.Errorf("Unable to read app secret (%s): %s", subpath, err.Error())
 	}
 
 	return secret.Data, nil
+}
+
+func (c *Config) ReadJwt(ctx context.Context, app string) ([]byte, error) {
+	vault, err := c.GetVault(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	secret, err := vault.KVv2("secret").Get(ctx, fmt.Sprintf("app/%s/jwt", app))
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read jwt for %s: %s", app, err.Error())
+	}
+
+	jwt := secret.Data["data"].([]byte)
+	if jwt == nil {
+		return nil, fmt.Errorf("Unable to read jwt for %s: data is empty", app)
+	}
+
+	return jwt, nil
 }
