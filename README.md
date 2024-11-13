@@ -61,6 +61,14 @@ Refactored JWT server & client middlewares:
 - JWT Client – sends s2s token instead of user ID token
 - BFF Meta Server – appends actor ID & tenant ID as metadata to context, to send them in s2s calls
 
+### v2/nats
+
+QueueManager updated to nats JetStream
+
+- JetStream Integration: The manager seamlessly integrates with JetStream for efficient message delivery and management.
+- Enhanced Reliability: Message delivery guarantees with redelivery attempts and dead-lettering.
+- Improved Performance: Optimized internal operations for faster interaction.
+
 ### zap
 
 Zap logger with JSON formatting
