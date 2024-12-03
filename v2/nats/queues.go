@@ -20,11 +20,17 @@ type naming struct {
 }
 
 // getNames function uses to generate standard general name
-func getNames(appName, queueName string) naming {
-	return naming{
+func getNames(serviceAppName, appName, queueName string) naming {
+	name := naming{
 		Subject:      fmt.Sprintf("%s.%s", appName, queueName),
-		ConsumerName: fmt.Sprintf("%s_%s", appName, queueName), // consumer name can't contain ., *, >, /, \
+		ConsumerName: fmt.Sprintf("%s_%s", serviceAppName, queueName), // consumer name can't contain ., *, >, /, \
 	}
+
+	if serviceAppName != appName {
+		name.ConsumerName = fmt.Sprintf("%s_%s_%s", serviceAppName, appName, queueName)
+	}
+
+	return name
 }
 
 // ------------------------------ Constants -----------------------------------------
@@ -146,7 +152,7 @@ func (qm *QueueManager) initQueue(subj string) *Queue {
 }
 
 func (qm *QueueManager) GetLocal(queueName string) IQueue {
-	names := getNames(qm.appName, queueName)
+	names := getNames(qm.appName, qm.appName, queueName)
 
 	return qm.GetRemote(names.Subject)
 }
@@ -166,7 +172,7 @@ func (qm *QueueManager) AddConsumer(queueName string, handler func(ctx context.C
 
 func (qm *QueueManager) AddRemoteConsumer(appName, queueName string, handler func(ctx context.Context, m jetstream.Msg) bool) {
 	// define names
-	names := getNames(appName, queueName)
+	names := getNames(qm.appName, appName, queueName)
 
 	// initial variables
 	queue := qm.GetRemote(names.Subject)
