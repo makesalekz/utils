@@ -40,3 +40,16 @@ func (p ApplicationID) BrandName() string {
 
 	return "AXIO"
 }
+
+func (p ApplicationID) CompanyFullName() string {
+	name := os.Getenv("COMPANY_FULL_NAME")
+	if name != "" {
+		return name
+	}
+
+	if p == AppCalendaria || p == AppPMS {
+		return "TOO \"AXIO\""
+	}
+
+	return "TOO \"AXIO\""
+}
