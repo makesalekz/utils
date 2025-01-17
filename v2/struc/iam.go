@@ -18,6 +18,7 @@ const (
 	Google     Provider = "GOOGLE"
 	Outlook    Provider = "OUTLOOK"
 	Apple      Provider = "APPLE"
+	Sxodim     Provider = "SXODIM"
 )
 
 func providerValues() []Provider {
