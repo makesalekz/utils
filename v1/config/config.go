@@ -14,6 +14,15 @@ import (
 	auth "github.com/hashicorp/vault/api/auth/approle"
 )
 
+type IConfig interface {
+	GetAppName() string
+	GetRegistry() *registry.Registry
+	GetVault(ctx context.Context) (*vault.Client, error)
+	ReadGlobalSecretsFor(ctx context.Context, subpath string) (map[string]interface{}, error)
+	ReadSecretsFor(ctx context.Context, subpath string) (map[string]interface{}, error)
+	ReadJwt(ctx context.Context, app string) ([]byte, error)
+}
+
 type Config struct {
 	kconfig.Config
 
@@ -24,7 +33,7 @@ type Config struct {
 	vault *vault.Client
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig() (IConfig, error) {
 	appName := os.Getenv("SERVICE_NAME")
 	if appName == "" {
 		return nil, fmt.Errorf("SERVICE_NAME not found")
