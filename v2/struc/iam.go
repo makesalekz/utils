@@ -22,7 +22,7 @@ const (
 )
 
 func providerValues() []Provider {
-	return []Provider{Calendaria, Google, Outlook, Apple}
+	return []Provider{Calendaria, Google, Outlook, Apple, Sxodim}
 }
 
 func (Provider) Values() (kinds []string) {
