@@ -64,6 +64,21 @@ func (mr *MockIConfigMockRecorder) GetRegistry() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegistry", reflect.TypeOf((*MockIConfig)(nil).GetRegistry))
 }
 
+// GetValue mocks base method.
+func (m *MockIConfig) GetValue(key string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetValue", key)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetValue indicates an expected call of GetValue.
+func (mr *MockIConfigMockRecorder) GetValue(key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetValue", reflect.TypeOf((*MockIConfig)(nil).GetValue), key)
+}
+
 // GetVault mocks base method.
 func (m *MockIConfig) GetVault(ctx context.Context) (*api.Client, error) {
 	m.ctrl.T.Helper()

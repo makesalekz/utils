@@ -21,6 +21,7 @@ type IConfig interface {
 	ReadGlobalSecretsFor(ctx context.Context, subpath string) (map[string]interface{}, error)
 	ReadSecretsFor(ctx context.Context, subpath string) (map[string]interface{}, error)
 	ReadJwt(ctx context.Context, app string) ([]byte, error)
+	GetValue(key string) (string, error)
 }
 
 type Config struct {
@@ -188,4 +189,8 @@ func (c *Config) ReadJwt(ctx context.Context, app string) ([]byte, error) {
 	}
 
 	return jwt, nil
+}
+
+func (c *Config) GetValue(key string) (string, error) {
+	return c.Value(key).String()
 }
