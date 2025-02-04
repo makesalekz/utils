@@ -114,7 +114,7 @@ type QueueManager struct {
 
 // NewQueueManager initializes a new QueueManager instance,
 // establishing a JetStream connection and configuring the manager.
-func NewQueueManager(c *config.Config, nc *nats.Conn, logger log.Logger) IQueueManager {
+func NewQueueManager(c config.IConfig, nc *nats.Conn, logger log.Logger) IQueueManager {
 	js, err := jetstream.New(nc)
 	if err != nil {
 		log.NewHelper(logger).Errorf("failed to initialize JetStream: %v", err)

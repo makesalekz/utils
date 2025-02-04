@@ -28,7 +28,7 @@ type QueueManager struct {
 	queues  map[string]*Queue
 }
 
-func NewQueueManager(c *config.Config, nc *nats.EncodedConn, logger log.Logger) IQueueManager {
+func NewQueueManager(c config.IConfig, nc *nats.EncodedConn, logger log.Logger) IQueueManager {
 	return &QueueManager{
 		nc:      nc,
 		log:     log.NewHelper(logger),
