@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	u_auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
+	u_auth "gitlab.calendaria.team/services/utils/v4/middlewares/auth"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"

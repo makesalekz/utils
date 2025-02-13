@@ -3,9 +3,9 @@ package dialer
 import (
 	"time"
 
-	u_config "gitlab.calendaria.team/services/utils/v1/config"
-	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
+	u_config "gitlab.calendaria.team/services/utils/v4/config"
+	u_jwt "gitlab.calendaria.team/services/utils/v4/jwt"
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/golang-jwt/jwt/v5"
@@ -24,7 +24,7 @@ type DialerManager struct {
 }
 
 func NewServiceDialerManager(
-	c *u_config.Config,
+	c u_config.IConfig,
 	tracer *u_tracing.Tracer,
 	jwt u_jwt.IJwtProcessor,
 ) (IDialerManager, error) {
