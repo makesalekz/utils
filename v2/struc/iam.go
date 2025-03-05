@@ -18,10 +18,11 @@ const (
 	Google     Provider = "GOOGLE"
 	Outlook    Provider = "OUTLOOK"
 	Apple      Provider = "APPLE"
+	Sxodim     Provider = "SXODIM"
 )
 
 func providerValues() []Provider {
-	return []Provider{Calendaria, Google, Outlook, Apple}
+	return []Provider{Calendaria, Google, Outlook, Apple, Sxodim}
 }
 
 func (Provider) Values() (kinds []string) {
