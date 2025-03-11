@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
-	consul "github.com/go-kratos/consul/registry"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"gitlab.calendaria.team/services/utils/v1/config"
 	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
 	"gitlab.calendaria.team/services/utils/v1/middlewares/auth"
+
+	consul "github.com/go-kratos/consul/registry"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 	ggrpc "google.golang.org/grpc"
 )
 
@@ -18,7 +19,7 @@ type Dialer struct {
 	jwt       *jwtp.JwtProcessor
 }
 
-func NewDialer(c *config.Config, jwt *jwtp.JwtProcessor) (*Dialer, error) {
+func NewDialer(c config.IConfig, jwt *jwtp.JwtProcessor) (*Dialer, error) {
 	return &Dialer{
 		discovery: c.GetRegistry(),
 		jwt:       jwt,

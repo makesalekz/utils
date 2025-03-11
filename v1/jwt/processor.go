@@ -13,7 +13,7 @@ type JwtProcessor struct {
 }
 
 // NewJwtProcessor .
-func NewJwtProcessor(c *config.Config) (*JwtProcessor, error) {
+func NewJwtProcessor(c config.IConfig) (*JwtProcessor, error) {
 	secret, err := c.ReadGlobalSecretsFor(context.Background(), "jwt")
 	if err != nil {
 		return nil, fmt.Errorf("jwt secret not found, error: %w", err)

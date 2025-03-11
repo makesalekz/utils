@@ -24,7 +24,7 @@ type DialerManager struct {
 }
 
 func NewServiceDialerManager(
-	c *u_config.Config,
+	c u_config.IConfig,
 	tracer *u_tracing.Tracer,
 	jwt u_jwt.IJwtProcessor,
 ) (IDialerManager, error) {

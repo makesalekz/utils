@@ -17,10 +17,10 @@ import (
 
 type Tracer struct {
 	initialized bool
-	conf        *u_config.Config
+	conf        u_config.IConfig
 }
 
-func NewTracer(conf *u_config.Config) *Tracer {
+func NewTracer(conf u_config.IConfig) *Tracer {
 	return &Tracer{
 		conf: conf,
 	}
@@ -38,9 +38,9 @@ func (t *Tracer) Initialize() error {
 	// Create new OTLP trace exporter
 	var exp *otlptrace.Exporter
 	var err error
-	endpoint, _ := t.conf.Value("OTLP_GRPC_ADDRESS").String()
+	endpoint, _ := t.conf.GetValue("OTLP_GRPC_ADDRESS")
 	if endpoint == "" {
-		endpoint, _ = t.conf.Value("OTLP_HTTP_ADDRESS").String()
+		endpoint, _ = t.conf.GetValue("OTLP_HTTP_ADDRESS")
 		if endpoint == "" {
 			return nil
 		}

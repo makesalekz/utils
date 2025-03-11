@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"gitlab.calendaria.team/services/utils/v1/config"
 	v1 "gitlab.calendaria.team/services/utils/v1/jwt"
+
+	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 )
 
 type IJwtProcessor interface {
@@ -20,7 +21,7 @@ type JwtProcessor struct {
 }
 
 // NewJwtProcessor .
-func NewJwtProcessor(c *config.Config) (IJwtProcessor, error) {
+func NewJwtProcessor(c config.IConfig) (IJwtProcessor, error) {
 	secret, err := c.ReadGlobalSecretsFor(context.Background(), "jwt")
 	if err != nil {
 		return nil, fmt.Errorf("jwt secret not found, error: %w", err)
