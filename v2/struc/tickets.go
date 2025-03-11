@@ -36,6 +36,7 @@ func (m EventProvider) IsValid() bool {
 type EventSeller string
 
 const (
+	EventSellerSxodim           EventSeller = "SXODIM"
 	EventSellerAlmatyArena      EventSeller = "ALMATY_ARENA" // almaty arena
 	EventSellerArenaTickets     EventSeller = "ARENA_TICKETS"
 	EventSellerPalaceOfRepublic EventSeller = "PALACE_OF_REPUBLIC"
@@ -44,7 +45,7 @@ const (
 
 func eventSellerValues() []EventSeller {
 	return []EventSeller{
-		EventSellerAlmatyArena, EventSellerArenaTickets, EventSellerPalaceOfRepublic, EventSellerBTickets,
+		EventSellerSxodim, EventSellerAlmatyArena, EventSellerArenaTickets, EventSellerPalaceOfRepublic, EventSellerBTickets,
 	}
 }
 
