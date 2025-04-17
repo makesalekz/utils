@@ -82,11 +82,6 @@ func (c *redisBadgeClient) IncrementBadge(ctx context.Context, userID int64, bad
 		return err
 	}
 
-	_, err = c.client.Expire(ctx, key, c.ttl).Result()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
