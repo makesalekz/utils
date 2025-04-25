@@ -26,6 +26,7 @@ type NotificationType string
 
 const (
 	Common   NotificationType = "COMMON"
+	Calendar NotificationType = "CALENDAR"
 	Event    NotificationType = "EVENT"
 	Contact  NotificationType = "CONTACT"
 	Tasks    NotificationType = "TASKS"
@@ -34,7 +35,7 @@ const (
 )
 
 func notificationTypeValues() []NotificationType {
-	return []NotificationType{Common, Event, Contact, Tasks, Projects, Chat}
+	return []NotificationType{Common, Calendar, Event, Contact, Tasks, Projects, Chat}
 }
 
 func (NotificationType) Values() (kinds []string) {
