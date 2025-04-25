@@ -13,19 +13,29 @@ type FirebaseNotification struct {
 	Data     map[string]string `json:"data,omitempty"`
 }
 
+type EmailDetails struct {
+	Language string            `json:"language,omitempty"`
+	Type     string            `json:"type,omitempty"`
+	Emails   []string          `json:"emails,omitempty"`
+	Data     map[string]string `json:"data,omitempty"`
+}
+
 // ------------------------------- Enums -----------------------------
 
 type NotificationType string
 
 const (
-	Common  NotificationType = "COMMON"
-	Event   NotificationType = "EVENT"
-	Contact NotificationType = "CONTACT"
-	Tasks   NotificationType = "TASKS"
+	Common   NotificationType = "COMMON"
+	Calendar NotificationType = "CALENDAR"
+	Event    NotificationType = "EVENT"
+	Contact  NotificationType = "CONTACT"
+	Tasks    NotificationType = "TASKS"
+	Projects NotificationType = "PROJECTS"
+	Chat     NotificationType = "CHAT"
 )
 
 func notificationTypeValues() []NotificationType {
-	return []NotificationType{Common, Event, Contact, Tasks}
+	return []NotificationType{Common, Calendar, Event, Contact, Tasks, Projects, Chat}
 }
 
 func (NotificationType) Values() (kinds []string) {

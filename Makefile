@@ -16,3 +16,5 @@ mock:
 	mockgen -source v4/jwt/processor.go -destination v4/jwt/mock/processor.go -package jwt_mock
 	mockgen -source v4/nats/queues.go -destination v4/nats/mock/queues.go -package queues_mock
 	mockgen -source v4/tracing/tracer.go -destination v4/tracing/mock/tracer.go -package tracing_mock
+	mockgen -source v4/badge/badge.go -destination v4/badge/mock/badge.go -package badge_mock
+	
