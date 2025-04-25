@@ -14,7 +14,8 @@ mock:
 	mockgen -source v4/dialer/dialer_manager.go -destination v4/dialer/mock/dialer_manager.go -package dialer_mock
 	mockgen -source v4/jwt/claims.go -destination v4/jwt/mock/claims.go -package jwt_mock
 	mockgen -source v4/jwt/processor.go -destination v4/jwt/mock/processor.go -package jwt_mock
-	mockgen -source v4/nats/queues.go -destination v4/nats/mock/queues.go -package queues_mock
+	mockgen -source v4/nats/queue.go -destination v4/nats/mock/queue.go -package queues_mock
+	mockgen -source v4/nats/queue_manager.go -destination v4/nats/mock/queue_manager.go -package queues_mock
 	mockgen -source v4/tracing/tracer.go -destination v4/tracing/mock/tracer.go -package tracing_mock
 	mockgen -source v4/badge/badge.go -destination v4/badge/mock/badge.go -package badge_mock
 	
