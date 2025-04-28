@@ -2,7 +2,6 @@ package nats
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -14,77 +13,6 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
-// ------------------------------ Naming -----------------------------------------
-type naming struct {
-	Subject      string `json:"subject"`
-	ConsumerName string `json:"consumer_name"`
-}
-
-// getNames function uses to generate standard general name
-func getNames(serviceAppName, appName, queueName string) naming {
-	name := naming{
-		Subject:      fmt.Sprintf("%s.%s", appName, queueName),
-		ConsumerName: fmt.Sprintf("%s_%s", serviceAppName, queueName), // consumer name can't contain ., *, >, /, \
-	}
-
-	if serviceAppName != appName {
-		name.ConsumerName = fmt.Sprintf("%s_%s_%s", serviceAppName, appName, queueName)
-	}
-
-	return name
-}
-
-// ------------------------------ Constants -----------------------------------------
-const (
-	maxAgeDuration     = 3 * 24 * time.Hour
-	maxMessagesInQueue = 1000000
-	maxMessageSize     = 5 << 20 // one message maximum size 5mb
-)
-
-// ------------------------------ Queue -----------------------------------------
-type IQueue interface {
-	// Pub publishes the provided data to the queue.
-	// It marshals the data to JSON and sends it to the JetStream server.
-	Pub(data any)
-}
-
-type queueKey struct{}
-
-type Queue struct {
-	js   jetstream.JetStream
-	log  *log.Helper
-	name string
-}
-
-// newQueue creates a new Queue instance.
-func newQueue(js jetstream.JetStream, log *log.Helper, name string) *Queue {
-	return &Queue{
-		js:   js,
-		log:  log,
-		name: name,
-	}
-}
-
-func (q *Queue) Pub(data any) {
-	// marshal data
-	msg, err := json.Marshal(data) // JetStream messages need to be []byte
-	if err != nil {
-		q.log.Errorf("failed to marshal data for %s: %v", q.name, err)
-		return
-	}
-
-	// initialize context
-	ctx := context.WithValue(context.Background(), queueKey{}, q)
-
-	// publish message
-	_, err = q.js.Publish(ctx, q.name, msg)
-	if err != nil {
-		q.log.Errorf("js.Publish for %s: %v", q.name, err)
-		return
-	}
-}
-
-// ------------------------------ Queue Manager -----------------------------------------
 type IQueueManager interface {
 	// GetLocal retrieves or initializes a local queue by concat appName (service name) and queue name.
 	// If the queue already exists, it's returned; otherwise, a new one is created.
@@ -97,12 +25,12 @@ type IQueueManager interface {
 	// AddConsumer adds a new consumer to the specified queue.
 	// It creates or updates a JetStream stream and consumer,
 	// then starts consuming messages and handling them with the provided handler.
-	AddConsumer(queueName string, handler func(ctx context.Context, m jetstream.Msg) bool)
+	AddConsumer(queueName string, handler func(ctx context.Context, m jetstream.Msg) bool, opts ...Option)
 
 	// AddRemoteConsumer adds a new consumer to a remote queue.
 	// It creates or updates a JetStream stream and consumer,
 	// then starts consuming messages and handling them with the provided handler.
-	AddRemoteConsumer(appName, queueName string, handler func(ctx context.Context, m jetstream.Msg) bool)
+	AddRemoteConsumer(appName, queueName string, handler func(ctx context.Context, m jetstream.Msg) bool, opts ...Option)
 }
 
 type QueueManager struct {
@@ -118,7 +46,7 @@ type QueueManager struct {
 func NewQueueManager(c config.IConfig, nc *nats.Conn, logger log.Logger) IQueueManager {
 	js, err := jetstream.New(nc)
 	if err != nil {
-		log.NewHelper(logger).Errorf("failed to initialize JetStream: %v", err)
+		log.NewHelper(logger).Errorf("failed to initialize JetStream: %s", err.Error())
 		return nil
 	}
 
@@ -167,31 +95,50 @@ func (qm *QueueManager) GetRemote(subject string) IQueue {
 	return queue
 }
 
-func (qm *QueueManager) AddConsumer(queueName string, handler func(ctx context.Context, m jetstream.Msg) bool) {
-	qm.AddRemoteConsumer(qm.appName, queueName, handler)
+func (qm *QueueManager) AddConsumer(
+	queueName string,
+	handler func(ctx context.Context, m jetstream.Msg) bool,
+	opts ...Option,
+) {
+	qm.AddRemoteConsumer(qm.appName, queueName, handler, opts...)
 }
 
-func (qm *QueueManager) AddRemoteConsumer(appName, queueName string, handler func(ctx context.Context, m jetstream.Msg) bool) {
+func (qm *QueueManager) AddRemoteConsumer(
+	appName, queueName string,
+	handler func(ctx context.Context, m jetstream.Msg) bool,
+	opts ...Option,
+) {
 	// define names
 	names := getNames(qm.appName, appName, queueName)
+
+	// parse options
+	options := NewOptions()
+	for _, opt := range opts {
+		opt(options)
+	}
 
 	// initial variables
 	queue := qm.GetRemote(names.Subject)
 	ctx := context.WithValue(context.Background(), queueKey{}, queue)
-	messageDelays := []time.Duration{5 * time.Second, 15 * time.Second, 30 * time.Minute, 1 * time.Hour, 2 * time.Hour}
 
 	// add stream with service name
 	stream, err := qm.js.CreateOrUpdateStream(ctx, jetstream.StreamConfig{
 		Name:              appName,
 		Description:       fmt.Sprintf("Stream for \"%s\" service", appName),
 		Subjects:          []string{fmt.Sprintf("%s.*", appName)},
-		MaxAge:            maxAgeDuration,
-		MaxMsgsPerSubject: maxMessagesInQueue,
-		MaxMsgSize:        maxMessageSize,
+		MaxAge:            options.MaxAge,
+		MaxMsgsPerSubject: options.MaxMessagesInQueue,
+		MaxMsgSize:        options.MaxMessageSize,
 	})
 	if err != nil {
-		qm.log.Errorf("failed to add stream: %v", err)
+		qm.log.Errorf("failed to add stream: %s", err.Error())
 		return
+	}
+
+	maxDeliver := len(options.BackOff) + 1
+
+	if options.Delay != nil {
+		maxDeliver += 1
 	}
 
 	// add consumer to stream with subject
@@ -203,27 +150,70 @@ func (qm *QueueManager) AddRemoteConsumer(appName, queueName string, handler fun
 		AckPolicy:     jetstream.AckAllPolicy,
 		ReplayPolicy:  jetstream.ReplayInstantPolicy,
 		AckWait:       30 * time.Second,
-		MaxDeliver:    len(messageDelays) + 1,
-		BackOff:       messageDelays,
+		MaxDeliver:    maxDeliver,
+		BackOff:       options.BackOff,
 		FilterSubject: names.Subject,
 	})
 	if err != nil {
-		qm.log.Errorf("failed to add consumer: %v", err)
+		qm.log.Errorf("failed to add consumer: %s", err.Error())
 		return
 	}
 
 	// actions on consume message
 	_, err = consumer.Consume(func(msg jetstream.Msg) {
+		md, err := msg.Metadata()
+		if err != nil {
+			qm.log.Errorf("failed to get msg metadata: %s", err.Error())
+			return
+		}
+
+		qm.log.Infof("delivered %d times", md.NumDelivered)
+
+		// check delay
+		if options.Delay != nil {
+			if md.NumDelivered == 1 {
+				err := msg.NakWithDelay(*options.Delay)
+				if err != nil {
+					qm.log.Errorf("failed to nak msg: %s", err.Error())
+				}
+				return
+			}
+		} else if md.NumDelivered == 1 {
+			notBefore := msg.Headers().Get("not-before")
+			if notBefore != "" {
+				notBeforeTime, err := time.Parse(time.RFC3339, notBefore)
+				if err != nil {
+					qm.log.Errorf("failed to parse not-before header: %s", err.Error())
+					return
+				}
+
+				if time.Now().Before(notBeforeTime) {
+					err := msg.NakWithDelay(notBeforeTime.Sub(time.Now()))
+					if err != nil {
+						qm.log.Errorf("failed to nak msg: %s", err.Error())
+					}
+					return
+				}
+			}
+		}
+
+		var errAck error
 		// check handler for success reply
 		if handler(ctx, msg) {
-			err2 := msg.Ack()
-			if err2 != nil {
-				qm.log.Errorf("failed to ack msg: %v", err2)
+			errAck = msg.Ack()
+		} else {
+			if md.NumDelivered < uint64(len(options.BackOff))+1 {
+				errAck = msg.NakWithDelay(options.BackOff[md.NumDelivered-1])
+			} else {
+				errAck = msg.Nak()
 			}
+		}
+		if errAck != nil {
+			qm.log.Errorf("failed to ack msg: %s", errAck.Error())
 		}
 	})
 	if err != nil {
-		qm.log.Errorf("failed to consume: %v", err)
+		qm.log.Errorf("failed to consume: %s", err.Error())
 		return
 	}
 }
