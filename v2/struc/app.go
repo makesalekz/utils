@@ -10,6 +10,7 @@ const (
 	AppCalendaria ApplicationID = "calendaria"
 	AppPMS        ApplicationID = "pms"
 	AppTickets    ApplicationID = "tickets"
+	AppKnowledge  ApplicationID = "knowledge"
 )
 
 func (p ApplicationID) Value() string {
@@ -23,6 +24,8 @@ func (p ApplicationID) IsValid() bool {
 	case AppPMS:
 		return true
 	case AppTickets:
+		return true
+	case AppKnowledge:
 		return true
 	}
 	return false
@@ -41,6 +44,8 @@ func (p ApplicationID) BrandName() string {
 		return "BasQaru"
 	case AppTickets:
 		return "Vibe"
+	case AppKnowledge:
+		return "IdeasGen"
 	}
 
 	return "AXIO"
