@@ -64,6 +64,21 @@ func (mr *MockIBadgeClientMockRecorder) GetBadges(ctx, userID interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBadges", reflect.TypeOf((*MockIBadgeClient)(nil).GetBadges), ctx, userID)
 }
 
+// GetUsers mocks base method.
+func (m *MockIBadgeClient) GetUsers(ctx context.Context) ([]int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret0, _ := ret[0].([]int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUsers indicates an expected call of GetUsers.
+func (mr *MockIBadgeClientMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockIBadgeClient)(nil).GetUsers), ctx)
+}
+
 // IncrementBadge mocks base method.
 func (m *MockIBadgeClient) IncrementBadge(ctx context.Context, userID int64, badgeType struc.NotificationType) error {
 	m.ctrl.T.Helper()

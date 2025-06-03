@@ -17,6 +17,7 @@ type IBadgeClient interface {
 	IncrementBadge(ctx context.Context, userID int64, badgeType u_struc.NotificationType) error
 	DecrementBadge(ctx context.Context, userID int64, badgeType u_struc.NotificationType, count int32) error
 	SetBadges(ctx context.Context, userID int64, badges map[u_struc.NotificationType]int64) error
+	GetUsers(ctx context.Context) ([]int64, error)
 }
 
 type redisBadgeClient struct {
@@ -146,4 +147,24 @@ func (c *redisBadgeClient) SetBadges(
 	}
 
 	return nil
+}
+
+func (c *redisBadgeClient) GetUsers(ctx context.Context) ([]int64, error) {
+	keys, err := c.client.Keys(ctx, "badges:*").Result()
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]int64, 0, len(keys))
+	for _, key := range keys {
+		userIDStr := key[len("badges:"):]
+		userID, err := strconv.ParseInt(userIDStr, 10, 64)
+		if err != nil {
+			c.log.Warnf("failed to parse user ID from key %s: %v", key, err)
+			continue
+		}
+		users = append(users, userID)
+	}
+
+	return users, nil
 }
