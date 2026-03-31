@@ -93,6 +93,12 @@ func (d *Dialer) Connect(ctx context.Context) (*ggrpc.ClientConn, error) {
 		grpc.WithDiscovery(d.dm.discovery),
 		grpc.WithTimeout(d.timeout),
 		grpc.WithMiddleware(middlewares...),
+		grpc.WithOptions(
+			ggrpc.WithDefaultCallOptions(
+				ggrpc.MaxCallRecvMsgSize(20*1024*1024),
+				ggrpc.MaxCallSendMsgSize(20*1024*1024),
+			),
+		),
 	)
 	if err != nil {
 		return nil, err
