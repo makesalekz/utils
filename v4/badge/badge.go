@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/redis/go-redis/v9"
 
-	u_struc "gitlab.calendaria.team/services/utils/v2/struc"
+	u_struc "github.com/makesalekz/utils/v2/struc"
 )
 
 type IBadgeClient interface {

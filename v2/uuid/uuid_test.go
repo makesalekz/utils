@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.calendaria.team/services/utils/v2/uuid"
+	"github.com/makesalekz/utils/v2/uuid"
 )
 
 func TestNewFromActorIDPositive(t *testing.T) {

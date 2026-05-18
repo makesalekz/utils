@@ -10,7 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
-	"gitlab.calendaria.team/services/utils/v1/config"
+	"github.com/makesalekz/utils/v1/config"
 )
 
 // ------------------------------ Naming -----------------------------------------

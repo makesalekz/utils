@@ -1,7 +1,7 @@
 package pagination
 
 import (
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
 )
 
 // defaul limit for all services

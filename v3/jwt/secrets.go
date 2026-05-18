@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.calendaria.team/services/utils/v1/config"
+	"github.com/makesalekz/utils/v1/config"
 )
 
 type IJwtSecret interface {

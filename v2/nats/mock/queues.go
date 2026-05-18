@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	jetstream "github.com/nats-io/nats.go/jetstream"
-	nats "gitlab.calendaria.team/services/utils/v2/nats"
+	nats "github.com/makesalekz/utils/v2/nats"
 )
 
 // MockIQueue is a mock of IQueue interface.

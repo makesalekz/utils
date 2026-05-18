@@ -3,8 +3,8 @@ package dialer
 import (
 	"time"
 
-	u_config "gitlab.calendaria.team/services/utils/v1/config"
-	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
+	u_config "github.com/makesalekz/utils/v1/config"
+	u_tracing "github.com/makesalekz/utils/v2/tracing"
 )
 
 type IDialerManager interface {

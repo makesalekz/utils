@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	struc "gitlab.calendaria.team/services/utils/v2/struc"
+	struc "github.com/makesalekz/utils/v2/struc"
 )
 
 // MockIBadgeClient is a mock of IBadgeClient interface.

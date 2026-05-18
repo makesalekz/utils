@@ -6,9 +6,9 @@ import (
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
-	"gitlab.calendaria.team/services/utils/v1/middlewares/auth"
+	"github.com/makesalekz/utils/v1/config"
+	jwtp "github.com/makesalekz/utils/v1/jwt"
+	"github.com/makesalekz/utils/v1/middlewares/auth"
 	ggrpc "google.golang.org/grpc"
 )
 

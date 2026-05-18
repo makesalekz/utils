@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	v1 "gitlab.calendaria.team/services/utils/v1/jwt"
-	"gitlab.calendaria.team/services/utils/v4/config"
+	v1 "github.com/makesalekz/utils/v1/jwt"
+	"github.com/makesalekz/utils/v4/config"
 
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 )

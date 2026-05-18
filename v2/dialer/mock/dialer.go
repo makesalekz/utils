@@ -10,7 +10,7 @@ import (
 	time "time"
 
 	gomock "github.com/golang/mock/gomock"
-	dialer "gitlab.calendaria.team/services/utils/v2/dialer"
+	dialer "github.com/makesalekz/utils/v2/dialer"
 	grpc "google.golang.org/grpc"
 )
 

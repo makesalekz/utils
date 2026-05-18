@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	jwt "gitlab.calendaria.team/services/utils/v4/jwt"
+	jwt "github.com/makesalekz/utils/v4/jwt"
 )
 
 // MockIJwtProcessor is a mock of IJwtProcessor interface.

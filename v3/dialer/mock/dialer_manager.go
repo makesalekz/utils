@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	dialer "gitlab.calendaria.team/services/utils/v3/dialer"
+	dialer "github.com/makesalekz/utils/v3/dialer"
 )
 
 // MockIDialerManager is a mock of IDialerManager interface.

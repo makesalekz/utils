@@ -1,4 +1,4 @@
-module gitlab.calendaria.team/services/utils
+module github.com/makesalekz/utils
 
 go 1.21
 

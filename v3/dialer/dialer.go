@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	u_auth "gitlab.calendaria.team/services/utils/v3/middlewares/auth"
+	u_auth "github.com/makesalekz/utils/v3/middlewares/auth"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/middleware"

@@ -3,7 +3,7 @@ package auth
 import (
 	"time"
 
-	u_jwt "gitlab.calendaria.team/services/utils/v3/jwt"
+	u_jwt "github.com/makesalekz/utils/v3/jwt"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	kjwt "github.com/go-kratos/kratos/v2/middleware/auth/jwt"

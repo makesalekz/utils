@@ -3,9 +3,9 @@ package dialer
 import (
 	"time"
 
-	u_config "gitlab.calendaria.team/services/utils/v4/config"
-	u_jwt "gitlab.calendaria.team/services/utils/v4/jwt"
-	u_tracing "gitlab.calendaria.team/services/utils/v4/tracing"
+	u_config "github.com/makesalekz/utils/v4/config"
+	u_jwt "github.com/makesalekz/utils/v4/jwt"
+	u_tracing "github.com/makesalekz/utils/v4/tracing"
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/golang-jwt/jwt/v5"
